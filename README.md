@@ -9,9 +9,12 @@ Stack : Python 3.10+, HTTP, MCP stdio, Docker, HTML de démo.
 Après `jev-memory serve` : [démo](http://127.0.0.1:8080/)
 
 <p>
-  <img src="docs/preview/still-01-probleme.png" alt="Pitch" width="32%">
-  <img src="docs/preview/still-02-memoire.png" alt="Candidats" width="32%">
-  <img src="docs/preview/still-03-selection.png" alt="Sélection" width="32%">
+  <img src="docs/preview/still-01-probleme.png" alt="Le problème" width="49%">
+  <img src="docs/preview/still-02-solution.png" alt="La solution" width="49%">
+</p>
+<p>
+  <img src="docs/preview/still-03-budget.png" alt="Budget tokens" width="49%">
+  <img src="docs/preview/still-04-stack.png" alt="Stack" width="49%">
 </p>
 
 ## Local, sans clé
