@@ -27,7 +27,7 @@ uv run jev-memory demo
 uv run jev-memory serve
 ```
 
-`provider=local` by default if you do not set keys. Docker:
+No agent and no LLM are required. `JEV_PROVIDER=auto` (the default) stays on the local heuristic. If JEV and a gateway are configured, they are used as the judge. Docker:
 
 ```bash
 docker compose up
@@ -98,7 +98,7 @@ If you have several LLMs or a multi-model key (OpenRouter, Groq), pick the judge
 cp .env.example .env
 ```
 
-`JEV_PROVIDER=jev` will not start if either side is missing.
+`JEV_PROVIDER=jev` will not start if either side is missing. With `auto`, missing keys just keep the local heuristic.
 
 ## HTTP
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import replace
 from datetime import datetime
 from typing import Any
 
@@ -23,7 +24,7 @@ class MemorySelector:
 
     def __init__(
         self,
-        provider: str = "local",
+        provider: str | None = None,
         *,
         api_key: str | None = None,
         jev_base_url: str | None = None,
@@ -33,11 +34,10 @@ class MemorySelector:
         settings: Settings | None = None,
     ) -> None:
         env = settings or Settings.from_env()
-        name = provider.strip().lower()
+        requested = (provider if provider is not None else env.provider or "auto").strip().lower()
         use_env_defaults = settings is not None
-        self.provider_name = name
-        self.settings = Settings(
-            provider=name,
+        draft = Settings(
+            provider=requested,
             jev_api_key=_coalesce(api_key, env.jev_api_key),
             jev_base_url=_coalesce(jev_base_url, env.jev_base_url),
             jev_model=env.jev_model,
@@ -47,8 +47,8 @@ class MemorySelector:
             max_candidates=env.max_candidates,
             max_results=env.max_results,
             max_tokens=env.max_tokens,
-            min_relevance=env.min_relevance if (name == "jev" or use_env_defaults) else 0.0,
-            redact_secrets=env.redact_secrets if use_env_defaults else name in {"jev", "custom"},
+            min_relevance=env.min_relevance,
+            redact_secrets=env.redact_secrets,
             host=env.host,
             port=env.port,
             auth_token=env.auth_token,
@@ -59,6 +59,18 @@ class MemorySelector:
             w_importance=env.w_importance,
             request_timeout=env.request_timeout,
         )
+        if requested in {"", "auto"}:
+            name = "jev" if draft.jev_ready() else "local"
+        else:
+            name = requested
+        if not use_env_defaults:
+            draft = replace(
+                draft,
+                min_relevance=env.min_relevance if name == "jev" else 0.0,
+                redact_secrets=name in {"jev", "custom"},
+            )
+        self.provider_name = name
+        self.settings = replace(draft, provider=name)
         self._validate()
 
     def _validate(self) -> None:
