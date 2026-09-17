@@ -2,11 +2,11 @@
 
 Filtre les souvenirs qu'un agent a déjà récupérés, pour ne lui en donner que ce qui tient dans le budget.
 
-Auteur : [Mathieu Rossignol](https://github.com/Pinutss). Licence MIT.
+Auteur : [Pinuts](https://github.com/Pinutss). Licence MIT.
 
 Stack : Python 3.10+, HTTP, MCP stdio, Docker, HTML de démo.
 
-[Aperçu 18 s](docs/preview/jev-memory-selector.mp4) · après `jev-memory serve` : [démo](http://127.0.0.1:8080/) et [film](http://127.0.0.1:8080/preview)
+Après `jev-memory serve` : [démo](http://127.0.0.1:8080/)
 
 <p>
   <img src="docs/preview/still-01-probleme.png" alt="Pitch" width="32%">
