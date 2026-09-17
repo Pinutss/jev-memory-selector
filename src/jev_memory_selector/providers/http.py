@@ -43,12 +43,12 @@ def post_json(
         with urlopen(request, timeout=timeout) as response:
             raw = response.read()
     except HTTPError as exc:
-        raise ProviderError(f"HTTP {exc.code} depuis {host_of(url)}") from None
+        raise ProviderError(f"HTTP {exc.code} from {host_of(url)}") from None
     except URLError as exc:
-        raise ProviderError(f"réseau indisponible pour {host_of(url)}") from exc
+        raise ProviderError(f"network unavailable for {host_of(url)}") from exc
     if not raw:
-        raise ProviderError(f"réponse vide depuis {host_of(url)}")
+        raise ProviderError(f"empty response from {host_of(url)}")
     try:
         return json.loads(raw.decode("utf-8"))
     except json.JSONDecodeError as exc:
-        raise ProviderError(f"JSON invalide depuis {host_of(url)}") from exc
+        raise ProviderError(f"invalid JSON from {host_of(url)}") from exc

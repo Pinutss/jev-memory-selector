@@ -1,4 +1,4 @@
-"""Interface en ligne de commande."""
+"""Command-line interface."""
 from __future__ import annotations
 
 import argparse
@@ -13,16 +13,16 @@ from .mcp_server import run_mcp
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
-    parser = argparse.ArgumentParser(prog="jev-memory", description="Sélecteur de mémoire JEV")
+    parser = argparse.ArgumentParser(prog="jev-memory", description="JEV memory selector")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("demo", help="Démonstration locale sans clé ni réseau")
-    select = sub.add_parser("select", help="Sélection selon JEV_PROVIDER")
+    sub.add_parser("demo", help="Local demo, no keys, no network")
+    select = sub.add_parser("select", help="Select using JEV_PROVIDER")
     select.add_argument("--file", required=True, help="JSON {query?, memories}")
     select.add_argument("--query", default=None)
     select.add_argument("--scope", default="default")
-    sub.add_parser("serve", help="Serveur HTTP /v1/select")
-    sub.add_parser("mcp", help="Serveur MCP stdio (memory_select)")
+    sub.add_parser("serve", help="HTTP server /v1/select")
+    sub.add_parser("mcp", help="MCP stdio server (memory_select)")
 
     args = parser.parse_args(argv)
     if args.command == "demo":
@@ -37,17 +37,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "mcp":
         run_mcp(Settings.from_env())
         return 0
-    parser.error("commande inconnue")
+    parser.error("unknown command")
     return 2
 
 
 def _demo() -> int:
     selector = MemorySelector(provider="mock")
     result = selector.select(
-        query="français",
+        query="english",
         memories=[
-            {"id": "language", "content": "Répondre en français", "scope": "demo"},
-            {"id": "database", "content": "Base PostgreSQL", "scope": "demo"},
+            {"id": "language", "content": "Reply in English", "scope": "demo"},
+            {"id": "database", "content": "PostgreSQL database", "scope": "demo"},
         ],
         max_memories=2,
         max_tokens=8,
@@ -62,7 +62,7 @@ def _select(path: str, query: str | None, scope: str) -> int:
     memories = payload.get("memories") if isinstance(payload, dict) else payload
     chosen_query = query or (payload.get("query") if isinstance(payload, dict) else None)
     if not chosen_query:
-        print("query manquante (--query ou champ JSON)", file=sys.stderr)
+        print("missing query (--query or JSON field)", file=sys.stderr)
         return 2
     settings = Settings.from_env()
     result = MemorySelector(provider=settings.provider, settings=settings).select(

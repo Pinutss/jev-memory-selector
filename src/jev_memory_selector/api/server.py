@@ -39,11 +39,11 @@ def handle_select(
     show_dropped: bool,
 ) -> dict[str, Any]:
     if any(key.lower() in {"api_key", "jev_api_key", "gateway_api_key"} for key in body):
-        raise ConfigurationError("les clés ne doivent pas figurer dans le corps")
+        raise ConfigurationError("keys must not appear in the body")
     query = body.get("query")
     memories = body.get("memories")
     if not isinstance(query, str) or not isinstance(memories, list):
-        raise ConfigurationError("query (string) et memories (array) sont obligatoires")
+        raise ConfigurationError("query (string) and memories (array) are required")
     selector = MemorySelector(provider=settings.provider, settings=settings)
     max_memories = body.get("max_memories")
     max_tokens = body.get("max_tokens")
@@ -113,10 +113,10 @@ def create_server(settings: Settings | None = None) -> ThreadingHTTPServer:
             try:
                 body = json.loads(raw.decode("utf-8"))
             except (UnicodeDecodeError, json.JSONDecodeError):
-                self._write(400, {"error": "JSON invalide"})
+                self._write(400, {"error": "invalid JSON"})
                 return
             if not isinstance(body, dict):
-                self._write(400, {"error": "objet JSON requis"})
+                self._write(400, {"error": "JSON object required"})
                 return
             try:
                 payload = handle_select(
@@ -144,7 +144,7 @@ def create_server(settings: Settings | None = None) -> ThreadingHTTPServer:
 def serve(settings: Settings | None = None) -> None:
     server = create_server(settings)
     host, port = server.server_address[:2]
-    print(f"jev-memory-selector sur http://{host}:{port}", flush=True)
+    print(f"jev-memory-selector at http://{host}:{port}", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

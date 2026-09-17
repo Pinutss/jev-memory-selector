@@ -1,6 +1,6 @@
-# Aperçus
+# Previews
 
-Images publiques du sélecteur (4K). Les vidéos restent locales, elles ne sont pas versionnées.
+Public stills for the selector (4K). Videos stay local and are not versioned.
 
 1. `01-problem.png`
 2. `02-solution.png`

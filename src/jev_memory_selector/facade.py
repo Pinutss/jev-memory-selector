@@ -63,7 +63,7 @@ class MemorySelector:
 
     def _validate(self) -> None:
         if self.provider_name not in {"local", "mock", "custom", "jev"}:
-            raise ConfigurationError(f"provider inconnu : {self.provider_name}")
+            raise ConfigurationError(f"unknown provider: {self.provider_name}")
         if self.provider_name == "jev":
             missing = [
                 name
@@ -78,10 +78,10 @@ class MemorySelector:
             ]
             if missing:
                 raise ConfigurationError(
-                    "provider jev exige " + ", ".join(missing)
+                    "provider jev requires " + ", ".join(missing)
                 )
         if self.provider_name == "custom" and not self.settings.jev_base_url:
-            raise ConfigurationError("JEV_BASE_URL est obligatoire pour le provider custom")
+            raise ConfigurationError("JEV_BASE_URL is required for the custom provider")
 
     def select(
         self,

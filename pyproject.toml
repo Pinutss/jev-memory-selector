@@ -1,7 +1,7 @@
 [project]
 name = "jev-memory-selector"
 version = "0.2.0"
-description = "Sélection de mémoire sous budget de tokens : heuristique locale ou JEV + gateway OpenAI-compatible."
+description = "Memory selection under a token budget: local heuristic or JEV plus an OpenAI-compatible gateway."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }

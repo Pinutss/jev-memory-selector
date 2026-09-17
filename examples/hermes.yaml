@@ -1,7 +1,7 @@
-# À fusionner dans ~/.hermes/config.yaml
+# Merge into ~/.hermes/config.yaml
 mcp_servers:
   jev-memory:
     command: uv
-    args: ["run", "--directory", "/chemin/vers/jev-memory-selector", "jev-memory", "mcp"]
+    args: ["run", "--directory", "/path/to/jev-memory-selector", "jev-memory", "mcp"]
     env:
       JEV_PROVIDER: local

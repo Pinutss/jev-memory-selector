@@ -1,4 +1,4 @@
-"""jev-memory-selector : sélection de mémoire pertinente sous budget de tokens."""
+"""jev-memory-selector: relevant memory selection under a token budget."""
 from .errors import ConfigurationError, ProviderError, SelectorError
 from .facade import MemorySelector
 from .models import (

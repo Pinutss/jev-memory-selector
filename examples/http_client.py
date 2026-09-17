@@ -1,4 +1,4 @@
-"""Client HTTP local. Aucune clé dans le corps."""
+"""Local HTTP client. No keys in the body."""
 from __future__ import annotations
 
 import json
@@ -8,10 +8,10 @@ import urllib.request
 
 def main() -> None:
     payload = {
-        "query": "français",
+        "query": "english",
         "memories": [
-            {"id": "language", "content": "Répondre en français", "scope": "demo"},
-            {"id": "database", "content": "Base PostgreSQL", "scope": "demo"},
+            {"id": "language", "content": "Reply in English", "scope": "demo"},
+            {"id": "database", "content": "PostgreSQL database", "scope": "demo"},
         ],
         "max_memories": 2,
         "max_tokens": 32,
@@ -27,9 +27,7 @@ def main() -> None:
         with urllib.request.urlopen(request, timeout=10) as response:
             print(response.read().decode("utf-8"))
     except urllib.error.URLError as exc:
-        raise SystemExit(
-            "Serveur injoignable. Lance `jev-memory serve` puis réessaie."
-        ) from exc
+        raise SystemExit("Server unreachable. Run `jev-memory serve` and try again.") from exc
 
 
 if __name__ == "__main__":

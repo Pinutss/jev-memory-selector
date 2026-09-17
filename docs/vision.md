@@ -1,7 +1,7 @@
-# VISION : document de produit, pas le contrat d'API
+# VISION: product document, not the API contract
 
-Ce fichier décrit la cible à long terme. L'API et le comportement réels
-sont ceux du README et du package `jev-memory-selector` 0.2.x.
+This file describes the long-term target. The real API and behavior
+are those of the README and the `jev-memory-selector` 0.2.x package.
 
 ---
 

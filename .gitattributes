@@ -1,6 +1,6 @@
 * text=auto eol=lf
 
-# Linguist : rendre visible la stack réelle (Python, HTML, JS, Docker, YAML).
+# Linguist: keep the real stack visible (Python, HTML, JS, Docker, YAML).
 *.html linguist-detectable=true linguist-language=HTML
 *.mjs linguist-detectable=true linguist-language=JavaScript
 *.js linguist-detectable=true linguist-language=JavaScript

@@ -24,11 +24,11 @@ class GatewayClient:
         timeout: float = 30.0,
     ) -> None:
         if not api_key:
-            raise ConfigurationError("GATEWAY_API_KEY est obligatoire pour le provider jev")
+            raise ConfigurationError("GATEWAY_API_KEY is required for the jev provider")
         if not base_url:
-            raise ConfigurationError("GATEWAY_BASE_URL est obligatoire pour le provider jev")
+            raise ConfigurationError("GATEWAY_BASE_URL is required for the jev provider")
         if not model:
-            raise ConfigurationError("GATEWAY_MODEL est obligatoire pour le provider jev")
+            raise ConfigurationError("GATEWAY_MODEL is required for the jev provider")
         self._api_key = api_key
         self._url = completions_url(base_url)
         self._model = model
@@ -37,18 +37,18 @@ class GatewayClient:
     def score(self, query: str, items: list[MemoryItem]) -> dict[str, float]:
         catalog = [{"id": item.id, "content": item.text} for item in items]
         prompt = (
-            "Tu es un juge de pertinence de souvenirs. "
-            "Réponds uniquement par un JSON : "
+            "You judge how relevant memories are. "
+            "Reply with JSON only: "
             '{"scores":[{"id":"...","score":0.0,"reason":"..."}]} '
-            "score entre 0 et 1.\n"
-            f"Requête : {query}\n"
-            f"Souvenirs : {json.dumps(catalog, ensure_ascii=False)}"
+            "score between 0 and 1.\n"
+            f"Query: {query}\n"
+            f"Memories: {json.dumps(catalog, ensure_ascii=False)}"
         )
         payload = {
             "model": self._model,
             "temperature": 0,
             "messages": [
-                {"role": "system", "content": "Tu renvoies uniquement du JSON valide."},
+                {"role": "system", "content": "Return valid JSON only."},
                 {"role": "user", "content": prompt},
             ],
         }
@@ -59,18 +59,18 @@ class GatewayClient:
 
 def _content_from_chat(response: Any) -> Any:
     if not isinstance(response, dict):
-        raise ProviderError("réponse gateway invalide")
+        raise ProviderError("invalid gateway response")
     choices = response.get("choices")
     if not isinstance(choices, list) or not choices:
-        raise ProviderError("réponse gateway sans choices")
+        raise ProviderError("gateway response has no choices")
     message = choices[0].get("message") if isinstance(choices[0], dict) else None
     if not isinstance(message, dict):
-        raise ProviderError("réponse gateway sans message")
+        raise ProviderError("gateway response has no message")
     content = message.get("content")
     if not isinstance(content, str) or not content.strip():
-        raise ProviderError("réponse gateway vide")
+        raise ProviderError("empty gateway response")
     cleaned = _FENCE_RE.sub("", content.strip())
     try:
         return json.loads(cleaned)
     except json.JSONDecodeError as exc:
-        raise ProviderError("JSON juge gateway invalide") from exc
+        raise ProviderError("invalid gateway judge JSON") from exc

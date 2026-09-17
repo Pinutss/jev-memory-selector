@@ -1,4 +1,4 @@
-"""Serveur MCP stdio : un tool memory_select. Les clés restent dans l'env."""
+"""MCP stdio server: one memory_select tool. Keys stay in the environment."""
 from __future__ import annotations
 
 import json
@@ -46,9 +46,9 @@ def _dispatch(message: dict[str, Any], settings: Settings) -> dict[str, Any] | N
         name = params.get("name")
         args = params.get("arguments") or {}
         if name != "memory_select":
-            return _ok(msg_id, _tool_error(f"outil inconnu : {name}"))
+            return _ok(msg_id, _tool_error(f"unknown tool: {name}"))
         if any(key in args for key in ("api_key", "jev_api_key", "gateway_api_key")):
-            return _ok(msg_id, _tool_error("les clés ne doivent pas figurer dans les arguments"))
+            return _ok(msg_id, _tool_error("keys must not appear in arguments"))
         try:
             result = MemorySelector(provider=settings.provider, settings=settings).select(
                 query=str(args.get("query") or ""),
@@ -67,14 +67,14 @@ def _dispatch(message: dict[str, Any], settings: Settings) -> dict[str, Any] | N
     return {
         "jsonrpc": "2.0",
         "id": msg_id,
-        "error": {"code": -32601, "message": f"méthode inconnue : {method}"},
+        "error": {"code": -32601, "message": f"unknown method: {method}"},
     }
 
 
 def _tool_schema() -> dict[str, Any]:
     return {
         "name": "memory_select",
-        "description": "Sélectionne les souvenirs pertinents sous budget de tokens.",
+        "description": "Selects relevant memories under a token budget.",
         "inputSchema": {
             "type": "object",
             "properties": {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -78,35 +78,35 @@
 <body>
   <header>
     <h1>jev-memory-selector</h1>
-    <p class="byline">Pinuts. Démo locale, sans clé.</p>
+    <p class="byline">Pinuts. Local demo, no keys.</p>
     <p class="stack">Python · HTTP · MCP · Docker · HTML</p>
   </header>
-  <label for="query">Requête</label>
-  <input id="query" value="Comment est configuré mon projet actuel ?">
+  <label for="query">Query</label>
+  <input id="query" value="How is my current project set up?">
   <div class="grid">
     <div>
-      <label for="budget">Budget tokens</label>
+      <label for="budget">Token budget</label>
       <input id="budget" type="number" min="1" value="40">
     </div>
     <div>
-      <label for="max">Max souvenirs</label>
+      <label for="max">Max memories</label>
       <input id="max" type="number" min="1" value="5">
     </div>
   </div>
-  <label for="memories">Souvenirs (un par ligne, id | texte)</label>
-  <textarea id="memories">m1 | Le projet utilise React.
-m2 | Le projet utilise React avec TypeScript.
-m3 | Le projet actuel utilise Next.js.
-m4 | Le projet précédent utilisait React.
-m5 | Le serveur tourne sous Debian.</textarea>
-  <button id="run" type="button">Lancer la sélection</button>
+  <label for="memories">Memories (one per line, id | text)</label>
+  <textarea id="memories">m1 | The project uses React.
+m2 | The project uses React with TypeScript.
+m3 | The current project uses Next.js.
+m4 | The previous project used React.
+m5 | The server runs Debian.</textarea>
+  <button id="run" type="button">Run selection</button>
   <div id="out"></div>
   <script>
     const $ = (id) => document.getElementById(id);
     async function run() {
       const button = $("run");
       button.disabled = true;
-      $("out").innerHTML = "<p class='meta'>Calcul…</p>";
+      $("out").innerHTML = "<p class='meta'>Working…</p>";
       const memories = $("memories").value.split("\n").map((line) => {
         const [id, ...rest] = line.split("|");
         return { id: id.trim(), content: rest.join("|").trim() };
@@ -132,13 +132,13 @@ m5 | Le serveur tourne sous Debian.</textarea>
             <strong>${escapeHtml(item.id)}</strong>
             <div>${escapeHtml(item.content)}</div>
             <div class="meta">${item.score} · ${item.tokens} tokens · ${(item.reasons || []).join(" · ")}</div>
-          </div>`).join("") || "<p class='meta'>Rien de retenu.</p>";
+          </div>`).join("") || "<p class='meta'>Nothing kept.</p>";
         const dropped = (data.dropped || []).map((item) => `
           <div class="drop"><strong>${escapeHtml(item.id)}</strong> · ${escapeHtml(item.reason)}</div>
-        `).join("") || "<p class='meta'>Aucun rejet.</p>";
+        `).join("") || "<p class='meta'>Nothing dropped.</p>";
         $("out").innerHTML = `
-          <div class="card"><h2>Gardés · ${data.total_tokens} tokens</h2>${selected}</div>
-          <div class="card"><h2>Laissés de côté</h2>${dropped}</div>`;
+          <div class="card"><h2>Kept · ${data.total_tokens} tokens</h2>${selected}</div>
+          <div class="card"><h2>Dropped</h2>${dropped}</div>`;
       } catch (err) {
         $("out").innerHTML = `<div class="card"><pre>${escapeHtml(String(err))}</pre></div>`;
       } finally {

@@ -15,7 +15,7 @@ def parse_score_list(payload: Any) -> dict[str, float]:
                 data = data[key]
                 break
     if not isinstance(data, list):
-        raise ProviderError("réponse de scores invalide")
+        raise ProviderError("invalid score response")
     scores: dict[str, float] = {}
     for row in data:
         if not isinstance(row, dict) or "id" not in row:

@@ -17,7 +17,7 @@ class CustomProvider:
         selector: HeuristicSelector | None = None,
     ) -> None:
         if not base_url:
-            raise ConfigurationError("JEV_BASE_URL est obligatoire pour le provider custom")
+            raise ConfigurationError("JEV_BASE_URL is required for the custom provider")
         self._base_url = base_url
         self._api_key = api_key
         self._timeout = timeout

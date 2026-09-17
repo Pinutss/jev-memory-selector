@@ -1,12 +1,12 @@
 # jev-memory-selector
 
-Filtre les souvenirs qu'un agent a déjà récupérés, pour ne lui en donner que ce qui tient dans le budget.
+Filters memories an agent already retrieved, so only what fits the budget is sent.
 
-Auteur : [Pinuts](https://github.com/Pinutss). Licence MIT.
+Author: [Pinuts](https://github.com/Pinutss). MIT license.
 
-Stack : Python 3.10+, HTTP, MCP stdio, Docker, HTML de démo.
+Stack: Python 3.10+, HTTP, MCP stdio, Docker, HTML demo.
 
-Après `jev-memory serve` : [démo](http://127.0.0.1:8080/)
+After `jev-memory serve`: [demo](http://127.0.0.1:8080/)
 
 <p>
   <img src="docs/preview/01-problem.png" alt="The problem" width="49%">
@@ -17,7 +17,7 @@ Après `jev-memory serve` : [démo](http://127.0.0.1:8080/)
   <img src="docs/preview/04-works-everywhere.png" alt="Works everywhere" width="49%">
 </p>
 
-## Local, sans clé
+## Local, no keys
 
 ```bash
 git clone https://github.com/Pinutss/jev-memory-selector
@@ -27,36 +27,36 @@ uv run jev-memory demo
 uv run jev-memory serve
 ```
 
-`provider=local` par défaut si tu ne mets pas de clés. Docker :
+`provider=local` by default if you do not set keys. Docker:
 
 ```bash
 docker compose up
 ```
 
-## Hermes et OpenClaw
+## Hermes and OpenClaw
 
-Oui, en local. Le process MCP n'a pas besoin de JEV ni de gateway :
+Yes, locally. The MCP process does not need JEV or a gateway:
 
 ```bash
 uv run jev-memory mcp
 ```
 
-Un tool : `memory_select`. Tu lui passes `query` + `memories`. Tes clés restent dans l'environnement du process, pas dans l'appel.
+One tool: `memory_select`. Pass `query` + `memories`. Keys stay in the process environment, not in the call.
 
-**Hermes** (`~/.hermes/config.yaml`) :
+**Hermes** (`~/.hermes/config.yaml`):
 
 ```yaml
 mcp_servers:
   jev-memory:
     command: uv
-    args: ["run", "--directory", "/chemin/vers/jev-memory-selector", "jev-memory", "mcp"]
+    args: ["run", "--directory", "/path/to/jev-memory-selector", "jev-memory", "mcp"]
     env:
       JEV_PROVIDER: local
 ```
 
-Puis `hermes mcp test jev-memory` et `/reload-mcp`.
+Then `hermes mcp test jev-memory` and `/reload-mcp`.
 
-**OpenClaw** (`~/.openclaw/openclaw.json`, ou Settings > MCP > Stdio) :
+**OpenClaw** (`~/.openclaw/openclaw.json`, or Settings > MCP > Stdio):
 
 ```json
 {
@@ -64,7 +64,7 @@ Puis `hermes mcp test jev-memory` et `/reload-mcp`.
     "servers": {
       "jev-memory": {
         "command": "uv",
-        "args": ["run", "--directory", "/chemin/vers/jev-memory-selector", "jev-memory", "mcp"],
+        "args": ["run", "--directory", "/path/to/jev-memory-selector", "jev-memory", "mcp"],
         "env": { "JEV_PROVIDER": "local" }
       }
     }
@@ -72,7 +72,7 @@ Puis `hermes mcp test jev-memory` et `/reload-mcp`.
 }
 ```
 
-Exemples prêts à copier : `examples/hermes.yaml`, `examples/openclaw.json`.
+Copy-ready examples: `examples/hermes.yaml`, `examples/openclaw.json`.
 
 ## Python
 
@@ -80,7 +80,7 @@ Exemples prêts à copier : `examples/hermes.yaml`, `examples/openclaw.json`.
 from jev_memory_selector import MemorySelector
 
 result = MemorySelector(provider="local").select(
-    query="Comment fonctionne mon backend ?",
+    query="How does my backend work?",
     memories=[{"id": "1", "content": "Backend FastAPI"}],
     max_memories=8,
     max_tokens=3000,
@@ -88,15 +88,15 @@ result = MemorySelector(provider="local").select(
 print(result.texts)
 ```
 
-## JEV + gateway (optionnel)
+## JEV + gateway (optional)
 
-Si tu branches le cloud plus tard, deux clés suffisent : `JEV_API_KEY` / `JEV_BASE_URL`, et ta gateway (`GATEWAY_API_KEY`, `GATEWAY_BASE_URL`, `GATEWAY_MODEL`). Pas de clé OpenAI / Anthropic / Gemini dans ce repo.
+If you wire the cloud later, two keys are enough: `JEV_API_KEY` / `JEV_BASE_URL`, and your gateway (`GATEWAY_API_KEY`, `GATEWAY_BASE_URL`, `GATEWAY_MODEL`). No OpenAI / Anthropic / Gemini key in this repo.
 
 ```bash
 cp .env.example .env
 ```
 
-`JEV_PROVIDER=jev` refuse de démarrer si une des deux manque.
+`JEV_PROVIDER=jev` will not start if either side is missing.
 
 ## HTTP
 
@@ -104,10 +104,10 @@ cp .env.example .env
 uv run jev-memory serve
 ```
 
-`GET /healthz`, `POST /v1/select`. Bind `127.0.0.1`. Le body ne contient pas de clés.
+`GET /healthz`, `POST /v1/select`. Binds `127.0.0.1`. The body must not contain keys.
 
-## Limites
+## Limits
 
-Le compteur par défaut compte ~4 caractères par token. En `local`, le tri est lexical. Le scope isole des listes, ce n'est pas une auth. Pas de store, pas de PyPI pour l'instant.
+The default counter is about 4 characters per token. In `local` mode, ranking is lexical. Scope isolates lists, it is not auth. No store, no PyPI yet.
 
-`docs/vision.md` est une cible longue, pas le contrat actuel.
+`docs/vision.md` is a long-term target, not the current contract.

@@ -6,7 +6,7 @@
         "args": [
           "run",
           "--directory",
-          "/chemin/vers/jev-memory-selector",
+          "/path/to/jev-memory-selector",
           "jev-memory",
           "mcp"
         ],

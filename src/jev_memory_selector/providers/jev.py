@@ -18,9 +18,9 @@ class JevClient:
         timeout: float = 30.0,
     ) -> None:
         if not api_key:
-            raise ConfigurationError("JEV_API_KEY est obligatoire pour le provider jev")
+            raise ConfigurationError("JEV_API_KEY is required for the jev provider")
         if not base_url:
-            raise ConfigurationError("JEV_BASE_URL est obligatoire pour le provider jev")
+            raise ConfigurationError("JEV_BASE_URL is required for the jev provider")
         self._api_key = api_key
         self._base_url = base_url
         self._model = model
