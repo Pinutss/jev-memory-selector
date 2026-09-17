@@ -877,8 +877,6 @@ jev-memory-selector/
 │   ├── hermes/
 │   └── custom-agent/
 │
-├── tests/
-│
 ├── benchmarks/
 │
 ├── docs/
@@ -1202,7 +1200,6 @@ BETTER CONTEXT
 - [ ] Token savings
 - [ ] Latency
 - [ ] Cost tracking
-- [ ] Regression tests
 
 ## Phase 6 : Developer Experience
 
