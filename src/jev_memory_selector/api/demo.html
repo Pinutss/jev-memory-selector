@@ -3,61 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JEV Memory Selector — démo</title>
+  <title>jev-memory-selector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root { color-scheme: dark; }
     body {
       margin: 0 auto;
-      max-width: 880px;
-      padding: 32px 20px 64px;
-      font: 15px/1.45 "Segoe UI", Arial, sans-serif;
-      background: #111318;
-      color: #ececec;
+      max-width: 820px;
+      padding: 40px 20px 72px;
+      font: 15px/1.5 Inter, "Segoe UI", Arial, sans-serif;
+      background: #0e0f12;
+      color: #e8e6e1;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
     }
-    h1 { font-size: 22px; font-weight: 600; margin: 0 0 8px; }
-    p.lead { color: #9aa0aa; margin: 0 0 24px; }
-    label { display: block; font-size: 12px; color: #9aa0aa; margin: 16px 0 6px; }
+    header { margin-bottom: 28px; }
+    h1 {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+    .byline { color: #9a958c; font-size: 14px; margin: 0; }
+    .stack { color: #9a958c; font-size: 13px; margin: 10px 0 0; }
+    label {
+      display: block;
+      font-size: 12px;
+      color: #9a958c;
+      margin: 18px 0 6px;
+    }
     textarea, input {
       width: 100%;
       box-sizing: border-box;
-      background: #1b1d24;
-      color: #ececec;
-      border: 1px solid #2c303a;
-      border-radius: 8px;
+      background: #17181c;
+      color: #e8e6e1;
+      border: 1px solid #2a2c33;
+      border-radius: 6px;
       padding: 10px 12px;
-      font: inherit;
+      font: 14px/1.45 Inter, "Segoe UI", Arial, sans-serif;
     }
-    textarea { min-height: 140px; resize: vertical; }
+    textarea { min-height: 148px; resize: vertical; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     button {
-      margin-top: 16px;
-      background: #3b82f6;
-      color: #fff;
+      margin-top: 18px;
+      background: #e8e6e1;
+      color: #111;
       border: 0;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font: inherit;
+      border-radius: 6px;
+      padding: 9px 14px;
+      font: 14px Inter, "Segoe UI", Arial, sans-serif;
       cursor: pointer;
     }
     button:disabled { opacity: 0.5; cursor: wait; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .card {
-      margin-top: 20px;
-      background: #1b1d24;
-      border: 1px solid #2c303a;
-      border-radius: 10px;
-      padding: 14px 16px;
+      margin-top: 22px;
+      border-top: 1px solid #2a2c33;
+      padding-top: 16px;
     }
-    .card h2 { font-size: 13px; margin: 0 0 8px; color: #9aa0aa; text-transform: uppercase; letter-spacing: .04em; }
-    .ok { border-left: 3px solid #3dd68c; padding-left: 10px; margin: 10px 0; }
-    .drop { border-left: 3px solid #f5a524; padding-left: 10px; margin: 10px 0; color: #c9cdd4; }
-    .meta { color: #9aa0aa; font-size: 12px; }
+    .card h2 {
+      font-size: 12px;
+      margin: 0 0 10px;
+      color: #9a958c;
+    }
+    .ok, .drop { margin: 12px 0; }
+    .ok { padding-left: 10px; border-left: 2px solid #6faf7a; }
+    .drop { padding-left: 10px; border-left: 2px solid #b0893a; color: #c4c0b6; }
+    .meta { color: #9a958c; font-size: 12px; }
     pre { white-space: pre-wrap; word-break: break-word; margin: 0; font-size: 13px; }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <h1>JEV Memory Selector</h1>
-  <p class="lead">Démo locale sans clé. Clique « Lancer la sélection » pour voir ce qui est gardé et ce qui est rejeté.</p>
+  <header>
+    <h1>jev-memory-selector</h1>
+    <p class="byline">Mathieu Rossignol. Démo locale, sans clé.</p>
+    <p class="stack">Python · HTTP · MCP · Docker · HTML</p>
+  </header>
   <label for="query">Requête</label>
   <input id="query" value="Comment est configuré mon projet actuel ?">
   <div class="grid">
@@ -83,7 +106,7 @@ m5 | Le serveur tourne sous Debian.</textarea>
     async function run() {
       const button = $("run");
       button.disabled = true;
-      $("out").innerHTML = "<p class='meta'>Sélection en cours…</p>";
+      $("out").innerHTML = "<p class='meta'>Calcul…</p>";
       const memories = $("memories").value.split("\n").map((line) => {
         const [id, ...rest] = line.split("|");
         return { id: id.trim(), content: rest.join("|").trim() };
@@ -108,14 +131,14 @@ m5 | Le serveur tourne sous Debian.</textarea>
           <div class="ok">
             <strong>${escapeHtml(item.id)}</strong>
             <div>${escapeHtml(item.content)}</div>
-            <div class="meta">score ${item.score} · ${item.tokens} tokens · ${(item.reasons || []).join(" · ")}</div>
-          </div>`).join("") || "<p class='meta'>Aucun souvenir retenu.</p>";
+            <div class="meta">${item.score} · ${item.tokens} tokens · ${(item.reasons || []).join(" · ")}</div>
+          </div>`).join("") || "<p class='meta'>Rien de retenu.</p>";
         const dropped = (data.dropped || []).map((item) => `
-          <div class="drop"><strong>${escapeHtml(item.id)}</strong> — ${escapeHtml(item.reason)}</div>
+          <div class="drop"><strong>${escapeHtml(item.id)}</strong> · ${escapeHtml(item.reason)}</div>
         `).join("") || "<p class='meta'>Aucun rejet.</p>";
         $("out").innerHTML = `
-          <div class="card"><h2>Retenus · ${data.total_tokens} tokens</h2>${selected}</div>
-          <div class="card"><h2>Rejetés</h2>${dropped}</div>`;
+          <div class="card"><h2>Gardés · ${data.total_tokens} tokens</h2>${selected}</div>
+          <div class="card"><h2>Laissés de côté</h2>${dropped}</div>`;
       } catch (err) {
         $("out").innerHTML = `<div class="card"><pre>${escapeHtml(String(err))}</pre></div>`;
       } finally {

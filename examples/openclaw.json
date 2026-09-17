@@ -1,0 +1,19 @@
+{
+  "mcp": {
+    "servers": {
+      "jev-memory": {
+        "command": "uv",
+        "args": [
+          "run",
+          "--directory",
+          "/chemin/vers/jev-memory-selector",
+          "jev-memory",
+          "mcp"
+        ],
+        "env": {
+          "JEV_PROVIDER": "local"
+        }
+      }
+    }
+  }
+}

@@ -1,50 +1,82 @@
 # jev-memory-selector
 
-Sélection de souvenirs pour agents IA, sous budget de tokens.
+Filtre les souvenirs qu'un agent a déjà récupérés, pour ne lui en donner que ce qui tient dans le budget.
 
-Premier module de [JEV Labs](https://github.com/Pinutss/jev-labs).
+Auteur : [Mathieu Rossignol](https://github.com/Pinutss). Licence MIT.
 
-![Le problème](docs/preview/still-01-probleme.png)
+Stack : Python 3.10+, HTTP, MCP stdio, Docker, HTML de démo.
 
-Votre agent n’a pas besoin de plus de mémoire. Il a besoin de la bonne sélection.
-
-[Voir l’aperçu motion (MP4, 18 s)](docs/preview/jev-memory-selector.mp4) · [Page live `/preview`](http://127.0.0.1:8080/preview)
+[Aperçu 18 s](docs/preview/jev-memory-selector.mp4) · après `jev-memory serve` : [démo](http://127.0.0.1:8080/) et [film](http://127.0.0.1:8080/preview)
 
 <p>
-  <img src="docs/preview/still-02-memoire.png" alt="Souvenirs candidats" width="48%">
-  <img src="docs/preview/still-03-selection.png" alt="Sélection pour l’agent" width="48%">
+  <img src="docs/preview/still-01-probleme.png" alt="Pitch" width="32%">
+  <img src="docs/preview/still-02-memoire.png" alt="Candidats" width="32%">
+  <img src="docs/preview/still-03-selection.png" alt="Sélection" width="32%">
 </p>
 
-En production, branchez **deux clés** :
-
-- `JEV_API_KEY` + `JEV_BASE_URL` — API de décision JEV
-- `GATEWAY_API_KEY` + `GATEWAY_BASE_URL` + `GATEWAY_MODEL` — **votre** gateway (OpenRouter, LiteLLM, Vercel AI Gateway, ou tout endpoint OpenAI-compatible)
-
-Pas de `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` ni `GEMINI_API_KEY` dans ce projet. La clé gateway ne part jamais chez JEV ; la clé JEV ne part jamais chez la gateway.
-
-Projet de [JEV Labs](https://github.com/Pinutss/jev-labs). Licence MIT. Aucun paquet publié sur PyPI.
-
-## Démarrer sans réseau
+## Local, sans clé
 
 ```bash
-uv sync --extra dev
-uv run pytest -q
+git clone https://github.com/Pinutss/jev-memory-selector
+cd jev-memory-selector
+uv sync
 uv run jev-memory demo
-uv run python examples/basic.py
+uv run jev-memory serve
 ```
 
-## Production : JEV + gateway
+`provider=local` par défaut si tu ne mets pas de clés. Docker :
 
 ```bash
-cp .env.example .env
-# renseigner JEV_* et GATEWAY_*
+docker compose up
 ```
+
+## Hermes et OpenClaw
+
+Oui, en local. Le process MCP n'a pas besoin de JEV ni de gateway :
+
+```bash
+uv run jev-memory mcp
+```
+
+Un tool : `memory_select`. Tu lui passes `query` + `memories`. Tes clés restent dans l'environnement du process, pas dans l'appel.
+
+**Hermes** (`~/.hermes/config.yaml`) :
+
+```yaml
+mcp_servers:
+  jev-memory:
+    command: uv
+    args: ["run", "--directory", "/chemin/vers/jev-memory-selector", "jev-memory", "mcp"]
+    env:
+      JEV_PROVIDER: local
+```
+
+Puis `hermes mcp test jev-memory` et `/reload-mcp`.
+
+**OpenClaw** (`~/.openclaw/openclaw.json`, ou Settings > MCP > Stdio) :
+
+```json
+{
+  "mcp": {
+    "servers": {
+      "jev-memory": {
+        "command": "uv",
+        "args": ["run", "--directory", "/chemin/vers/jev-memory-selector", "jev-memory", "mcp"],
+        "env": { "JEV_PROVIDER": "local" }
+      }
+    }
+  }
+}
+```
+
+Exemples prêts à copier : `examples/hermes.yaml`, `examples/openclaw.json`.
+
+## Python
 
 ```python
 from jev_memory_selector import MemorySelector
 
-selector = MemorySelector(provider="jev")
-result = selector.select(
+result = MemorySelector(provider="local").select(
     query="Comment fonctionne mon backend ?",
     memories=[{"id": "1", "content": "Backend FastAPI"}],
     max_memories=8,
@@ -53,61 +85,26 @@ result = selector.select(
 print(result.texts)
 ```
 
-OpenRouter :
+## JEV + gateway (optionnel)
 
-```env
-JEV_PROVIDER=jev
-JEV_API_KEY=jev_...
-JEV_BASE_URL=https://api.example.com/v1/select
-GATEWAY_BASE_URL=https://openrouter.ai/api/v1
-GATEWAY_API_KEY=sk-or-...
-GATEWAY_MODEL=openai/gpt-4o-mini
+Si tu branches le cloud plus tard, deux clés suffisent : `JEV_API_KEY` / `JEV_BASE_URL`, et ta gateway (`GATEWAY_API_KEY`, `GATEWAY_BASE_URL`, `GATEWAY_MODEL`). Pas de clé OpenAI / Anthropic / Gemini dans ce repo.
+
+```bash
+cp .env.example .env
 ```
 
-## Autres providers
-
-| Provider | Clés | Réseau |
-| --- | --- | --- |
-| `local` | aucune | non |
-| `mock` | aucune | non (`jev-memory demo`) |
-| `custom` | `JEV_BASE_URL` | POST utilisateur |
-| `jev` | JEV + gateway | oui |
-
-`HeuristicSelector` reste disponible pour un usage local déterministe.
+`JEV_PROVIDER=jev` refuse de démarrer si une des deux manque.
 
 ## HTTP
 
 ```bash
 uv run jev-memory serve
-# GET  http://127.0.0.1:8080/healthz
-# POST http://127.0.0.1:8080/v1/select
 ```
 
-Le corps ne doit pas contenir de clés. Bind par défaut : `127.0.0.1`. Pour `0.0.0.0`, définir `JEV_MEMORY_AUTH_TOKEN`.
-
-```bash
-uv run python examples/http_client.py
-```
-
-## Docker
-
-```bash
-cp .env.example .env
-docker compose up
-```
-
-L’image démarre en `local` si `JEV_PROVIDER` n’est pas défini. Pour le mode prod, renseignez les deux clés dans `.env` et `JEV_PROVIDER=jev`. Le port est publié sur `127.0.0.1:8080`.
-
-## MCP
-
-```bash
-uv run jev-memory mcp
-```
-
-Un tool : `memory_select` (`query`, `memories`, limites). Les clés restent dans l’environnement du process.
+`GET /healthz`, `POST /v1/select`. Bind `127.0.0.1`. Le body ne contient pas de clés.
 
 ## Limites
 
-Le compteur par défaut estime un token pour quatre caractères. Le mode `local` est lexical, pas sémantique. Le mode `jev` dépend de l’API JEV et de votre gateway. Les souvenirs sont redactés avant tout appel distant. Le scope est un filtre, pas une authentification. Pas de persistance, pas de sandbox, pas de benchmark publié.
+Le compteur par défaut compte ~4 caractères par token. En `local`, le tri est lexical. Le scope isole des listes, ce n'est pas une auth. Pas de store, pas de PyPI pour l'instant.
 
-La vision produit longue est dans `docs/vision.md` : ce n’est pas le contrat d’API actuel.
+`docs/vision.md` est une cible longue, pas le contrat actuel.

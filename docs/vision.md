@@ -1,4 +1,4 @@
-# VISION — document de produit, pas le contrat d'API
+# VISION : document de produit, pas le contrat d'API
 
 Ce fichier décrit la cible à long terme. L'API et le comportement réels
 sont ceux du README et du package `jev-memory-selector` 0.2.x.
@@ -260,14 +260,14 @@ Pour rendre le projet réellement universel, prévoir également un mode 100 % l
          JEV API              Local decision model
 ```
 
-### Mode 1 — JEV Cloud
+### Mode 1 : JEV Cloud
 
 ```env
 JEV_PROVIDER=jev
 JEV_API_KEY=...
 ```
 
-### Mode 2 — Local
+### Mode 2 : Local
 
 ```env
 JEV_PROVIDER=local
@@ -275,7 +275,7 @@ JEV_PROVIDER=local
 
 Aucune API distante obligatoire.
 
-### Mode 3 — Custom endpoint
+### Mode 3 : Custom endpoint
 
 ```env
 JEV_PROVIDER=custom
@@ -1027,7 +1027,7 @@ Ne pas le présenter comme :
 
 Mais comme :
 
-> **JEV Memory Selector — an intelligent context layer for AI agents.**
+> **JEV Memory Selector : an intelligent context layer for AI agents.**
 
 Pitch :
 
@@ -1157,7 +1157,7 @@ BETTER CONTEXT
 
 # 33. 🛠️ Roadmap proposée
 
-## Phase 1 — Core
+## Phase 1 : Core
 
 - [ ] Python package
 - [ ] Memory schema
@@ -1167,7 +1167,7 @@ BETTER CONTEXT
 - [ ] Basic selection
 - [ ] Tests unitaires
 
-## Phase 2 — Context
+## Phase 2 : Context
 
 - [ ] Ranking
 - [ ] Token budget
@@ -1176,7 +1176,7 @@ BETTER CONTEXT
 - [ ] Duplicate detection
 - [ ] Contradiction detection
 
-## Phase 3 — Integrations
+## Phase 3 : Integrations
 
 - [ ] REST API
 - [ ] MCP server
@@ -1187,7 +1187,7 @@ BETTER CONTEXT
 - [ ] LangChain
 - [ ] LangGraph
 
-## Phase 4 — Security
+## Phase 4 : Security
 
 - [ ] Secret detection
 - [ ] Redaction
@@ -1195,7 +1195,7 @@ BETTER CONTEXT
 - [ ] Privacy controls
 - [ ] Local-only mode
 
-## Phase 5 — Evaluation
+## Phase 5 : Evaluation
 
 - [ ] Benchmark datasets
 - [ ] Precision / recall
@@ -1204,7 +1204,7 @@ BETTER CONTEXT
 - [ ] Cost tracking
 - [ ] Regression tests
 
-## Phase 6 — Developer Experience
+## Phase 6 : Developer Experience
 
 - [ ] CLI
 - [ ] Docker

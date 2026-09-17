@@ -57,7 +57,7 @@ def _dispatch(message: dict[str, Any], settings: Settings) -> dict[str, Any] | N
                 max_tokens=args.get("max_tokens"),
                 scope=str(args.get("scope") or "default"),
             )
-        except Exception as exc:  # noqa: BLE001 — surface MCP
+        except Exception as exc:  # noqa: BLE001, surface MCP
             return _ok(msg_id, _tool_error(str(exc)))
         show_dropped = bool(settings.auth_token) or settings.host not in {"0.0.0.0", "::"}
         text = json.dumps(result.to_dict(include_dropped=show_dropped), ensure_ascii=False)
