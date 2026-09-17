@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JEV Memory Selector — aperçu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #07080c;
+      color: #f4f4f5;
+      font-family: Inter, Arial, sans-serif;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+      overflow: hidden;
+    }
+    .stage {
+      width: 1280px;
+      height: 720px;
+      margin: 0 auto;
+      position: relative;
+      background:
+        radial-gradient(900px 500px at 20% 10%, #1a2744 0%, transparent 55%),
+        radial-gradient(700px 420px at 90% 80%, #12231c 0%, transparent 50%),
+        #0b0d12;
+    }
+    .layer { position: absolute; inset: 0; pointer-events: none; }
+    .kicker {
+      position: absolute; top: 56px; left: 80px;
+      font-size: 18px; letter-spacing: 0.18em; text-transform: uppercase;
+      color: #8b93a7;
+    }
+    .headline {
+      position: absolute; top: 210px; left: 80px; right: 80px;
+      font-size: 64px; line-height: 1.08; font-weight: 600; letter-spacing: -0.03em; max-width: 980px;
+    }
+    .sub {
+      position: absolute; top: 470px; left: 80px;
+      font-size: 28px; color: #b7becc; max-width: 760px;
+    }
+    .card {
+      position: absolute;
+      width: 360px;
+      padding: 18px 20px;
+      border-radius: 14px;
+      background: #161922;
+      border: 1px solid #2a3040;
+      box-shadow: 0 18px 40px rgba(0,0,0,.28);
+      font-size: 20px;
+      line-height: 1.35;
+    }
+    .card small {
+      display: block;
+      color: #8b93a7;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .card.keep { border-color: #3dd68c; }
+    .card.drop { border-color: #f5a524; opacity: .38; filter: grayscale(.4); }
+    .query {
+      position: absolute; top: 88px; left: 80px; right: 80px;
+      font-size: 34px; font-weight: 600;
+    }
+    .agent {
+      position: absolute; right: 80px; top: 230px; width: 320px; height: 260px;
+      border-radius: 18px; border: 1px solid #3b82f6;
+      background: #101623;
+      padding: 22px;
+      font-size: 22px;
+    }
+    .agent span { display: block; color: #8b93a7; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+    .mark {
+      position: absolute; bottom: 48px; left: 80px;
+      font-size: 18px; color: #8b93a7; letter-spacing: .08em;
+    }
+    .hidden { opacity: 0; }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="layer" id="scene-title">
+      <div class="kicker">JEV Labs · premier module</div>
+      <div class="headline">Votre agent n’a pas besoin<br>de plus de mémoire.</div>
+      <div class="sub">Il a besoin de la bonne sélection.</div>
+    </div>
+    <div class="layer hidden" id="scene-flood">
+      <div class="query">Comment est configuré mon projet actuel ?</div>
+      <div class="card" id="c1" style="top:180px;left:80px"><small>m1</small>Le projet utilise React.</div>
+      <div class="card" id="c2" style="top:180px;left:460px"><small>m2</small>Le projet utilise React avec TypeScript.</div>
+      <div class="card" id="c3" style="top:360px;left:80px"><small>m3</small>Le projet actuel utilise Next.js.</div>
+      <div class="card" id="c4" style="top:360px;left:460px"><small>m4</small>Le projet précédent utilisait React.</div>
+      <div class="card" id="c5" style="top:270px;left:840px"><small>m5</small>Le serveur tourne sous Debian.</div>
+    </div>
+    <div class="layer hidden" id="scene-pick">
+      <div class="query">JEV Memory Selector décide</div>
+      <div class="card keep" id="p3" style="top:200px;left:80px"><small>retenu · m3</small>Le projet actuel utilise Next.js.</div>
+      <div class="card drop" id="p4" style="top:200px;left:460px"><small>faible · m4</small>Ancien projet React</div>
+      <div class="card drop" id="p5" style="top:380px;left:460px"><small>rejeté · m5</small>Debian — hors sujet</div>
+      <div class="agent" id="agent"><span>Contexte agent</span>Next.js, état actuel, budget respecté.</div>
+    </div>
+    <div class="layer hidden" id="scene-end">
+      <div class="kicker">jev-memory-selector</div>
+      <div class="headline">Give agents the<br>right context.</div>
+      <div class="sub">Couche de décision entre la mémoire et l’agent. Locale, ou JEV + votre gateway.</div>
+    </div>
+    <div class="mark">jev-labs</div>
+  </div>
+  <script>
+    const hide = (id) => { document.getElementById(id).classList.add("hidden"); };
+    const show = (id) => { document.getElementById(id).classList.remove("hidden"); };
+    const fade = (el, from, to, ms) => {
+      el.animate([{ opacity: from }, { opacity: to }], { duration: ms, fill: "forwards", easing: "cubic-bezier(.16,1,.3,1)" });
+    };
+    const slide = (el, y) => {
+      el.animate(
+        [{ translate: "0 28px", opacity: 0 }, { translate: "0 0", opacity: 1 }],
+        { duration: 700, fill: "forwards", easing: "cubic-bezier(.16,1,.3,1)" }
+      );
+    };
+    async function wait(ms) { return new Promise((r) => setTimeout(r, ms)); }
+    async function play() {
+      show("scene-title");
+      fade(document.getElementById("scene-title"), 0, 1, 700);
+      await wait(3200);
+      fade(document.getElementById("scene-title"), 1, 0, 400);
+      await wait(400);
+      hide("scene-title");
+      show("scene-flood");
+      ["c1","c2","c3","c4","c5"].forEach((id, i) => {
+        setTimeout(() => slide(document.getElementById(id)), 180 * i);
+      });
+      await wait(4200);
+      fade(document.getElementById("scene-flood"), 1, 0, 400);
+      await wait(400);
+      hide("scene-flood");
+      document.getElementById("scene-flood").style.opacity = "";
+      show("scene-pick");
+      fade(document.getElementById("scene-pick"), 0, 1, 500);
+      await wait(4500);
+      fade(document.getElementById("scene-pick"), 1, 0, 400);
+      await wait(400);
+      hide("scene-pick");
+      show("scene-end");
+      fade(document.getElementById("scene-end"), 0, 1, 700);
+      await wait(4200);
+    }
+    document.fonts.ready.then(play);
+  </script>
+</body>
+</html>

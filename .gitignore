@@ -12,3 +12,7 @@ build/
 Thumbs.db
 FOLLOW_UP.md
 .env.local
+node_modules/
+.ruff_cache/
+docs/preview/*.webm
+docs/preview/package-lock.json

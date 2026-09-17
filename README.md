@@ -1,57 +1,113 @@
 # jev-memory-selector
 
-Sélection locale de souvenirs pour agents IA, avec classement explicable et budget configurable.
+Sélection de souvenirs pour agents IA, sous budget de tokens.
 
-Projet de [JEV Labs](https://github.com/Pinutss/jev-labs).
+Premier module de [JEV Labs](https://github.com/Pinutss/jev-labs).
 
-## Statut
+![Le problème](docs/preview/still-01-probleme.png)
 
-Prototype Python heuristique, sans appel réseau. L’intégration JEV n’est pas implémentée : sa documentation et son API restent à confirmer. Le protocole `Judge` est une proposition non raccordée au sélecteur, pas un adaptateur utilisable.
+Votre agent n’a pas besoin de plus de mémoire. Il a besoin de la bonne sélection.
 
-## Démarrer localement
+[Voir l’aperçu motion (MP4, 18 s)](docs/preview/jev-memory-selector.mp4) · [Page live `/preview`](http://127.0.0.1:8080/preview)
 
-Depuis le dossier `jev-memory-selector`, avec uv installé :
+<p>
+  <img src="docs/preview/still-02-memoire.png" alt="Souvenirs candidats" width="48%">
+  <img src="docs/preview/still-03-selection.png" alt="Sélection pour l’agent" width="48%">
+</p>
+
+En production, branchez **deux clés** :
+
+- `JEV_API_KEY` + `JEV_BASE_URL` — API de décision JEV
+- `GATEWAY_API_KEY` + `GATEWAY_BASE_URL` + `GATEWAY_MODEL` — **votre** gateway (OpenRouter, LiteLLM, Vercel AI Gateway, ou tout endpoint OpenAI-compatible)
+
+Pas de `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` ni `GEMINI_API_KEY` dans ce projet. La clé gateway ne part jamais chez JEV ; la clé JEV ne part jamais chez la gateway.
+
+Projet de [JEV Labs](https://github.com/Pinutss/jev-labs). Licence MIT. Aucun paquet publié sur PyPI.
+
+## Démarrer sans réseau
 
 ```bash
 uv sync --extra dev
 uv run pytest -q
+uv run jev-memory demo
 uv run python examples/basic.py
-uv build
 ```
 
-## Comportement
+## Production : JEV + gateway
 
-- Filtrage par scope et expiration.
-- Score lexical, fraîcheur à demi-vie configurable et importance.
-- Sélection gloutonne dans le budget, sans tronquer les souvenirs.
-- Déduplication approximative par recouvrement lexical.
-- Raisons de sélection et de rejet disponibles dans le résultat.
-- Compteur de tokens injectable, sans dépendance à un fournisseur.
-
-## Exemple d’API
+```bash
+cp .env.example .env
+# renseigner JEV_* et GATEWAY_*
+```
 
 ```python
-from jev_memory_selector import HeuristicSelector, MemoryItem, SelectionRequest
+from jev_memory_selector import MemorySelector
 
-result = HeuristicSelector().select(
-    [MemoryItem(id="m1", text="Répondre en français", scope="alice")],
-    SelectionRequest(query="français", scope="alice", budget_tokens=32),
+selector = MemorySelector(provider="jev")
+result = selector.select(
+    query="Comment fonctionne mon backend ?",
+    memories=[{"id": "1", "content": "Backend FastAPI"}],
+    max_memories=8,
+    max_tokens=3000,
 )
 print(result.texts)
 ```
 
-## Limites importantes
+OpenRouter :
 
-Le compteur fourni estime un token pour quatre caractères. Le budget ne garantit donc que la somme de ces estimations, pas le nombre réel de tokens du modèle. Injecter son tokenizer et réserver séparément le coût du prompt, des séparateurs et des métadonnées.
+```env
+JEV_PROVIDER=jev
+JEV_API_KEY=jev_...
+JEV_BASE_URL=https://api.example.com/v1/select
+GATEWAY_BASE_URL=https://openrouter.ai/api/v1
+GATEWAY_API_KEY=sk-or-...
+GATEWAY_MODEL=openai/gpt-4o-mini
+```
 
-Le classement est lexical, pas sémantique. Il peut retenir des souvenirs sans correspondance avec la requête ; la déduplication peut confondre des faits proches. Il ne résout pas les contradictions.
+## Autres providers
 
-Le déterminisme du classement nécessite les mêmes données, la même horloge `now`, la même configuration et un compteur déterministe. Les IDs dupliqués sont traités dans l’ordre d’entrée ; l’ordre des rejets n’est pas canonique.
+| Provider | Clés | Réseau |
+| --- | --- | --- |
+| `local` | aucune | non |
+| `mock` | aucune | non (`jev-memory demo`) |
+| `custom` | `JEV_BASE_URL` | POST utilisateur |
+| `jev` | JEV + gateway | oui |
 
-Le scope est un filtre, pas une authentification. L’appelant doit imposer les permissions et ne fournir que des données autorisées. Les rejets exposent des identifiants : ne pas retourner ce diagnostic à un utilisateur non autorisé. Le scope par défaut est partagé, utiliser un scope explicite en environnement multi-utilisateur.
+`HeuristicSelector` reste disponible pour un usage local déterministe.
 
-Aucune persistance, protection contre l’injection de prompt, sandbox ou intégration JEV n’est fournie. Pas de benchmark comparatif ni de validation en production.
+## HTTP
 
-## Licence
+```bash
+uv run jev-memory serve
+# GET  http://127.0.0.1:8080/healthz
+# POST http://127.0.0.1:8080/v1/select
+```
 
-À choisir avant distribution comme logiciel open source. Aucun paquet publié sur PyPI.
+Le corps ne doit pas contenir de clés. Bind par défaut : `127.0.0.1`. Pour `0.0.0.0`, définir `JEV_MEMORY_AUTH_TOKEN`.
+
+```bash
+uv run python examples/http_client.py
+```
+
+## Docker
+
+```bash
+cp .env.example .env
+docker compose up
+```
+
+L’image démarre en `local` si `JEV_PROVIDER` n’est pas défini. Pour le mode prod, renseignez les deux clés dans `.env` et `JEV_PROVIDER=jev`. Le port est publié sur `127.0.0.1:8080`.
+
+## MCP
+
+```bash
+uv run jev-memory mcp
+```
+
+Un tool : `memory_select` (`query`, `memories`, limites). Les clés restent dans l’environnement du process.
+
+## Limites
+
+Le compteur par défaut estime un token pour quatre caractères. Le mode `local` est lexical, pas sémantique. Le mode `jev` dépend de l’API JEV et de votre gateway. Les souvenirs sont redactés avant tout appel distant. Le scope est un filtre, pas une authentification. Pas de persistance, pas de sandbox, pas de benchmark publié.
+
+La vision produit longue est dans `docs/vision.md` : ce n’est pas le contrat d’API actuel.

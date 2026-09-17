@@ -1,12 +1,12 @@
-"""Point d'extension pour un juge externe (JEV).
+"""Point d'extension interne pour un juge externe.
 
-L'adaptateur JEV sera écrit lorsque la référence officielle de JEV
-(contrat d'API, licence, limites de fonctionnement) sera confirmée.
-En attendant, HeuristicSelector est la seule implémentation fournie.
+Ce protocole n'est pas exporté. HeuristicSelector et les providers
+JEV / gateway couvrent le classement public.
 """
 from __future__ import annotations
 
-from typing import Protocol, Sequence
+from collections.abc import Sequence
+from typing import Protocol
 
 from .models import MemoryItem, SelectionRequest
 

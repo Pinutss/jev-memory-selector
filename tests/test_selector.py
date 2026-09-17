@@ -45,7 +45,8 @@ def test_pertinence_classee_en_premier():
         item(id="gen", text="note générale sur le projet"),
         item(id="spec", text="bug d'affichage Safari sur la page de paiement"),
     ]
-    result = HeuristicSelector().select(items, SelectionRequest(query="bug Safari affichage", now=NOW))
+    request = SelectionRequest(query="bug Safari affichage", now=NOW)
+    result = HeuristicSelector().select(items, request)
     assert result.selected[0].id == "spec"
     assert any(r.startswith("relevance=") for r in result.selected[0].reasons)
 
@@ -98,3 +99,24 @@ def test_max_items():
 def test_importance_validee():
     with pytest.raises(ValueError):
         item(importance=1.5)
+
+
+def test_tags_sont_normalises():
+    tagged = MemoryItem(
+        id="t",
+        text="note generale",
+        created_at=NOW - timedelta(days=1),
+        tags=("Safari",),
+    )
+    result = HeuristicSelector().select([tagged], SelectionRequest(query="safari", now=NOW))
+    assert result.selected[0].id == "t"
+    assert any(r.startswith("relevance=1.00") for r in result.selected[0].reasons)
+
+
+def test_seuil_de_pertinence():
+    items = [item(id="x", text="Le serveur tourne sous Debian.")]
+    result = HeuristicSelector(min_relevance=0.15).select(
+        items, SelectionRequest(query="configuration projet actuel", now=NOW)
+    )
+    assert result.selected == ()
+    assert [d.reason for d in result.dropped] == ["low_relevance"]

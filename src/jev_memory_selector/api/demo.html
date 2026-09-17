@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JEV Memory Selector — démo</title>
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      margin: 0 auto;
+      max-width: 880px;
+      padding: 32px 20px 64px;
+      font: 15px/1.45 "Segoe UI", Arial, sans-serif;
+      background: #111318;
+      color: #ececec;
+    }
+    h1 { font-size: 22px; font-weight: 600; margin: 0 0 8px; }
+    p.lead { color: #9aa0aa; margin: 0 0 24px; }
+    label { display: block; font-size: 12px; color: #9aa0aa; margin: 16px 0 6px; }
+    textarea, input {
+      width: 100%;
+      box-sizing: border-box;
+      background: #1b1d24;
+      color: #ececec;
+      border: 1px solid #2c303a;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+    textarea { min-height: 140px; resize: vertical; }
+    button {
+      margin-top: 16px;
+      background: #3b82f6;
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.5; cursor: wait; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .card {
+      margin-top: 20px;
+      background: #1b1d24;
+      border: 1px solid #2c303a;
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .card h2 { font-size: 13px; margin: 0 0 8px; color: #9aa0aa; text-transform: uppercase; letter-spacing: .04em; }
+    .ok { border-left: 3px solid #3dd68c; padding-left: 10px; margin: 10px 0; }
+    .drop { border-left: 3px solid #f5a524; padding-left: 10px; margin: 10px 0; color: #c9cdd4; }
+    .meta { color: #9aa0aa; font-size: 12px; }
+    pre { white-space: pre-wrap; word-break: break-word; margin: 0; font-size: 13px; }
+    @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>JEV Memory Selector</h1>
+  <p class="lead">Démo locale sans clé. Clique « Lancer la sélection » pour voir ce qui est gardé et ce qui est rejeté.</p>
+  <label for="query">Requête</label>
+  <input id="query" value="Comment est configuré mon projet actuel ?">
+  <div class="grid">
+    <div>
+      <label for="budget">Budget tokens</label>
+      <input id="budget" type="number" min="1" value="40">
+    </div>
+    <div>
+      <label for="max">Max souvenirs</label>
+      <input id="max" type="number" min="1" value="5">
+    </div>
+  </div>
+  <label for="memories">Souvenirs (un par ligne, id | texte)</label>
+  <textarea id="memories">m1 | Le projet utilise React.
+m2 | Le projet utilise React avec TypeScript.
+m3 | Le projet actuel utilise Next.js.
+m4 | Le projet précédent utilisait React.
+m5 | Le serveur tourne sous Debian.</textarea>
+  <button id="run" type="button">Lancer la sélection</button>
+  <div id="out"></div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    async function run() {
+      const button = $("run");
+      button.disabled = true;
+      $("out").innerHTML = "<p class='meta'>Sélection en cours…</p>";
+      const memories = $("memories").value.split("\n").map((line) => {
+        const [id, ...rest] = line.split("|");
+        return { id: id.trim(), content: rest.join("|").trim() };
+      }).filter((row) => row.id && row.content);
+      try {
+        const response = await fetch("/v1/select", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query: $("query").value,
+            memories,
+            max_tokens: Number($("budget").value),
+            max_memories: Number($("max").value),
+          }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          $("out").innerHTML = `<div class="card"><pre>${escapeHtml(data.error || JSON.stringify(data))}</pre></div>`;
+          return;
+        }
+        const selected = (data.selected || []).map((item) => `
+          <div class="ok">
+            <strong>${escapeHtml(item.id)}</strong>
+            <div>${escapeHtml(item.content)}</div>
+            <div class="meta">score ${item.score} · ${item.tokens} tokens · ${(item.reasons || []).join(" · ")}</div>
+          </div>`).join("") || "<p class='meta'>Aucun souvenir retenu.</p>";
+        const dropped = (data.dropped || []).map((item) => `
+          <div class="drop"><strong>${escapeHtml(item.id)}</strong> — ${escapeHtml(item.reason)}</div>
+        `).join("") || "<p class='meta'>Aucun rejet.</p>";
+        $("out").innerHTML = `
+          <div class="card"><h2>Retenus · ${data.total_tokens} tokens</h2>${selected}</div>
+          <div class="card"><h2>Rejetés</h2>${dropped}</div>`;
+      } catch (err) {
+        $("out").innerHTML = `<div class="card"><pre>${escapeHtml(String(err))}</pre></div>`;
+      } finally {
+        button.disabled = false;
+      }
+    }
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+    $("run").addEventListener("click", run);
+    run();
+  </script>
+</body>
+</html>

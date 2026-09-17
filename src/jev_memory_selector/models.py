@@ -1,12 +1,29 @@
 """Modèles de données du sélecteur de mémoire."""
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Any
 
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _parse_datetime(value: object, field_name: str) -> datetime | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            raise ValueError(f"{field_name} doit être timezone-aware")
+        return value
+    if isinstance(value, str):
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            raise ValueError(f"{field_name} doit être timezone-aware")
+        return parsed
+    raise ValueError(f"{field_name} a un type invalide")
 
 
 @dataclass(frozen=True)
@@ -20,6 +37,8 @@ class MemoryItem:
     tags : jetons additionnels pris en compte dans la pertinence.
     scope : isolatif, par exemple un identifiant d'utilisateur.
     expires_at : au-delà de cette date, l'élément est rejeté.
+    similarity : score de retrieval optionnel, 0.0 à 1.0.
+    metadata : paires libres fournies par l'appelant.
     """
 
     id: str
@@ -29,6 +48,8 @@ class MemoryItem:
     tags: tuple[str, ...] = ()
     scope: str = "default"
     expires_at: datetime | None = None
+    similarity: float | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.id:
@@ -41,6 +62,55 @@ class MemoryItem:
             raise ValueError("created_at doit être timezone-aware")
         if self.expires_at is not None and self.expires_at.tzinfo is None:
             raise ValueError("expires_at doit être timezone-aware")
+        if self.similarity is not None and not 0.0 <= self.similarity <= 1.0:
+            raise ValueError("similarity doit être compris entre 0.0 et 1.0")
+
+    def with_text(self, text: str) -> MemoryItem:
+        """Copie figée avec un nouveau texte (redaction)."""
+        return MemoryItem(
+            id=self.id,
+            text=text,
+            created_at=self.created_at,
+            importance=self.importance,
+            tags=self.tags,
+            scope=self.scope,
+            expires_at=self.expires_at,
+            similarity=self.similarity,
+            metadata=self.metadata,
+        )
+
+    @classmethod
+    def from_mapping(cls, data: MemoryItem | Mapping[str, Any]) -> MemoryItem:
+        """Accepte MemoryItem ou un dict (content/text, namespace/scope)."""
+        if isinstance(data, cls):
+            return data
+        text = data.get("text")
+        if text is None:
+            text = data.get("content")
+        if not isinstance(text, str):
+            raise ValueError("text ou content est obligatoire")
+        scope = data.get("scope")
+        if not scope:
+            scope = data.get("namespace") or "default"
+        tags = data.get("tags") or ()
+        if isinstance(tags, str):
+            tags = (tags,)
+        created_at = _parse_datetime(data.get("created_at"), "created_at") or utcnow()
+        expires_at = _parse_datetime(data.get("expires_at"), "expires_at")
+        metadata = data.get("metadata") or {}
+        if not isinstance(metadata, dict):
+            raise ValueError("metadata doit être un objet")
+        return cls(
+            id=str(data.get("id") or ""),
+            text=text,
+            created_at=created_at,
+            importance=float(data.get("importance", 0.5)),
+            tags=tuple(str(tag) for tag in tags),
+            scope=str(scope),
+            expires_at=expires_at,
+            similarity=None if data.get("similarity") is None else float(data["similarity"]),
+            metadata=metadata,
+        )
 
 
 @dataclass(frozen=True)
@@ -94,3 +164,23 @@ class SelectionResult:
     @property
     def texts(self) -> tuple[str, ...]:
         return tuple(item.text for item in self.selected)
+
+    def to_dict(self, *, include_dropped: bool = True) -> dict[str, Any]:
+        payload: dict[str, Any] = {
+            "selected": [
+                {
+                    "id": item.id,
+                    "content": item.text,
+                    "score": item.score,
+                    "tokens": item.tokens,
+                    "reasons": list(item.reasons),
+                }
+                for item in self.selected
+            ],
+            "total_tokens": self.total_tokens,
+        }
+        if include_dropped:
+            payload["dropped"] = [
+                {"id": item.id, "reason": item.reason} for item in self.dropped
+            ]
+        return payload

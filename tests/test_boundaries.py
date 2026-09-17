@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 import pytest
+
 from jev_memory_selector import HeuristicSelector, MemoryItem, SelectionRequest
 
 
@@ -18,4 +18,6 @@ def test_distinct_numbers_are_not_duplicates():
 def test_invalid_counter_fails_closed(value):
     with pytest.raises(ValueError):
         HeuristicSelector(token_counter=lambda text: value).select(
-            [MemoryItem(id="one", text="bonjour")], SelectionRequest())
+            [MemoryItem(id="one", text="bonjour")],
+            SelectionRequest(),
+        )
