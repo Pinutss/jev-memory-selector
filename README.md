@@ -92,6 +92,8 @@ print(result.texts)
 
 If you wire the cloud later, two keys are enough: `JEV_API_KEY` / `JEV_BASE_URL`, and your gateway (`GATEWAY_API_KEY`, `GATEWAY_BASE_URL`, `GATEWAY_MODEL`). No OpenAI / Anthropic / Gemini key in this repo.
 
+If you have several LLMs or a multi-model key (OpenRouter, Groq), pick the judge model with [jev-model-router](https://github.com/Pinutss/jev-model-router), then set `GATEWAY_*` to that endpoint. Keys stay in the environment, never in the request body.
+
 ```bash
 cp .env.example .env
 ```
