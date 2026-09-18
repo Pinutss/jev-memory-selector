@@ -1,0 +1,37 @@
+{
+  "name": "jev-memory-selector",
+  "displayName": "JEV Memory Selector",
+  "version": "0.2.0",
+  "description": "Selects retrieved memories that actually fit the current query and token budget.",
+  "author": {
+    "name": "Pinuts",
+    "url": "https://github.com/Pinutss"
+  },
+  "homepage": "https://github.com/Pinutss/jev-memory-selector",
+  "repository": "https://github.com/Pinutss/jev-memory-selector",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "context",
+    "token-budget",
+    "mcp",
+    "jev"
+  ],
+  "logo": "assets/logo.svg",
+  "category": "memory",
+  "mcpServers": {
+    "jev-memory": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "${CURSOR_PLUGIN_ROOT}",
+        "jev-memory",
+        "mcp"
+      ],
+      "env": {
+        "JEV_PROVIDER": "local"
+      }
+    }
+  }
+}

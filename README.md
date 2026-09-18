@@ -33,6 +33,24 @@ No agent and no LLM are required. `JEV_PROVIDER=auto` (the default) stays on the
 docker compose up
 ```
 
+## Cursor and Hermes plugin
+
+This repository is an [Agent Plugin](https://agent-plugins.org/). Cursor and Hermes can install it directly.
+
+**Hermes**
+
+```bash
+hermes plugins install Pinutss/jev-memory-selector --enable
+```
+
+**Cursor**
+
+Install from the [JEV plugins marketplace](https://github.com/Pinutss/jev-plugins), or copy this folder to `~/.cursor/plugins/local/jev-memory-selector`.
+
+One tool: `memory_select`. Pass `query` + `memories`. Keys stay in the process environment, not in the call.
+
+Requires [uv](https://docs.astral.sh/uv/). `JEV_PROVIDER` defaults to `local`.
+
 ## Hermes and OpenClaw
 
 Yes, locally. The MCP process does not need JEV or a gateway:

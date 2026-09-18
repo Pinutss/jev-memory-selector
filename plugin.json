@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "jev-memory-selector",
+  "version": "0.2.0",
+  "description": "Selects retrieved memories that actually fit the current query and token budget.",
+  "author": {
+    "name": "Pinuts",
+    "url": "https://github.com/Pinutss"
+  },
+  "homepage": "https://github.com/Pinutss/jev-memory-selector",
+  "repository": "https://github.com/Pinutss/jev-memory-selector",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "context",
+    "token-budget",
+    "mcp",
+    "jev"
+  ]
+}
