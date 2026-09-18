@@ -72,8 +72,6 @@ Then `hermes mcp test jev-memory` and `/reload-mcp`.
 }
 ```
 
-Copy-ready examples: `examples/hermes.yaml`, `examples/openclaw.json`.
-
 ## Python
 
 ```python
