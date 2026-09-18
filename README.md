@@ -8,15 +8,6 @@ Stack: Python 3.10+, HTTP, MCP stdio, Docker, HTML demo.
 
 After `jev-memory serve`: [demo](http://127.0.0.1:8080/)
 
-<p>
-  <img src="docs/preview/01-problem.png" alt="The problem" width="49%">
-  <img src="docs/preview/02-solution.png" alt="The solution" width="49%">
-</p>
-<p>
-  <img src="docs/preview/03-token-budget.png" alt="Token budget" width="49%">
-  <img src="docs/preview/04-works-everywhere.png" alt="Works everywhere" width="49%">
-</p>
-
 ## Local, no keys
 
 ```bash

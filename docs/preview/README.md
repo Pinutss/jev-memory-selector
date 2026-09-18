@@ -1,8 +1,6 @@
 # Previews
 
-Public stills for the selector (4K). Videos stay local and are not versioned.
+4K stills stay local and are not versioned. They are ignored and
+`export-ignore` so a Hermes / git-archive install stays small.
 
-1. `01-problem.png`
-2. `02-solution.png`
-3. `03-token-budget.png`
-4. `04-works-everywhere.png`
+To regenerate: `docs/preview/record.mjs`.

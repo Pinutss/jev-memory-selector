@@ -15,4 +15,5 @@ node_modules/
 .ruff_cache/
 docs/preview/*.webm
 docs/preview/*.mp4
+docs/preview/*.png
 docs/preview/package-lock.json

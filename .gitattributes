@@ -8,8 +8,8 @@ Dockerfile linguist-detectable=true linguist-language=Dockerfile
 *.yml linguist-detectable=true linguist-language=YAML
 *.yaml linguist-detectable=true linguist-language=YAML
 docker-compose.yml linguist-language=YAML
-docs/preview/package-lock.json linguist-generated=true
-docs/preview/*.mp4 linguist-generated=true
-docs/preview/*.webm linguist-generated=true
-docs/preview/*.png linguist-generated=true
+docs/preview/package-lock.json linguist-generated=true export-ignore
+docs/preview/*.mp4 linguist-generated=true export-ignore
+docs/preview/*.webm linguist-generated=true export-ignore
+docs/preview/*.png linguist-generated=true export-ignore
 docs/vision.md linguist-documentation=true
