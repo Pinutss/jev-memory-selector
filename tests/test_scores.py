@@ -12,10 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from jev_memory_selector.errors import ProviderError  # noqa: E402
-from jev_memory_selector.providers.scores import (  # noqa: E402
-    parse_noul,
-    parse_score_list,
-)
+from jev_memory_selector.providers.scores import parse_score_list  # noqa: E402
 
 
 def test_out_of_range_score_is_dropped_not_clamped() -> None:
@@ -48,10 +45,8 @@ def test_missing_noul_is_not_zero() -> None:
     assert parse_score_list([{"id": "a"}, {"id": "b", "noul": None}]) == {}
 
 
-def test_parse_noul_rejects_bool() -> None:
-    assert parse_noul({"noul": True}) is None
-    assert parse_noul({"noul": 0.5}) == 0.5
-    assert parse_noul({}) is None
+def test_bool_is_not_a_score() -> None:
+    assert parse_score_list([{"id": "a", "noul": True}, {"id": "b", "noul": 0.5}]) == {"b": 0.5}
 
 
 def test_non_list_payload_raises() -> None:
@@ -63,11 +58,11 @@ def test_non_list_payload_raises() -> None:
 
 
 def test_systemone_answers_mapping_is_parsed() -> None:
-    """TypeSafe System One answers {answers: {qid: {noul, confidence}}} — a dict of dicts."""
+    """System One's answer shape: {answers: {qid: {type, noul}}}, a dict of dicts."""
     payload = {
         "answers": {
-            "m1": {"noul": 0.92, "confidence": 0.8},
-            "m2": {"noul": 0.11, "confidence": 0.7},
+            "m1": {"type": "noul", "noul": 0.92},
+            "m2": {"type": "noul", "noul": 0.11},
         }
     }
     assert parse_score_list(payload) == {"m1": 0.92, "m2": 0.11}

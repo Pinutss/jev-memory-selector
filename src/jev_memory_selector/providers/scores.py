@@ -14,14 +14,9 @@ from ..errors import ProviderError
 def _rows(data: Any) -> list[Any] | None:
     """Normalise the envelope into a list of rows.
 
-    TypeSafe System One answers ``{"answers": {...}}`` where the mapping is keyed by the
-    question id, so the real payload is a dict of dicts — not the list this parser used to
-    require. A caller pointing at ``JEV_PROVIDER=jev`` against the documented endpoint was
-    getting ``invalid score response`` for every batch, which reads as a broken judge rather
-    than a parser that did not know the shape.
-
-    A recognised key is the only way in: a bare dict of scalars is not a row set, so it is
-    rejected rather than half-parsed.
+    Accepts a list, or a dict holding one under a known key. A dict of dicts keyed by id
+    (the shape TypeSafe System One uses for ``answers``) becomes a list of rows. Any other
+    dict is rejected rather than half-parsed.
     """
     if isinstance(data, dict):
         for key in ("scores", "selected", "memories", "answers", "results"):
@@ -36,19 +31,6 @@ def _rows(data: Any) -> list[Any] | None:
     return data if isinstance(data, list) else None
 
 
-def parse_noul(answer: dict[str, Any]) -> float | None:
-    """Read one keep-probability. ``None`` when the answer is not a usable 0-1 score.
-
-    A missing ``noul`` is not a zero: the row is skipped, not scored 0.0, so the selector
-    falls back to its own signal instead of treating silence as a rejection.
-    """
-    noul = answer.get("noul")
-    if isinstance(noul, bool) or not isinstance(noul, (int, float)):
-        return None
-    score = float(noul)
-    return score if 0.0 <= score <= 1.0 else None
-
-
 def parse_score_list(payload: Any) -> dict[str, float]:
     """Accepte une liste, ou un objet {answers|scores|selected|memories}."""
     rows = _rows(payload)
@@ -59,6 +41,8 @@ def parse_score_list(payload: Any) -> dict[str, float]:
         if not isinstance(row, dict) or "id" not in row:
             continue
         raw = row.get("noul", row.get("score", row.get("confidence")))
+        if isinstance(raw, bool):
+            continue
         try:
             score = float(raw)  # type: ignore[arg-type]
         except (TypeError, ValueError):
